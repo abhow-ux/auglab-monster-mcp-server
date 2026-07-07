@@ -62,7 +62,7 @@ server.registerTool(
         description: 'Create the monster body. Must be called before adding any other parts. Replaces any existing monster.',
         inputSchema: z.object({
             color: z.enum(['blue', 'green', 'red', 'yellow', 'dark']).describe('Body color, dark=brown'),
-            shape: z.enum(['A', 'B', 'C', 'D', 'E', 'F']).describe('Body shape variant: A=round, B=tall, C=wide, D=blob, E=long body, F=long body with hair tufts'),
+            shape: z.enum(['A', 'B', 'C', 'D', 'E', 'F']).describe('Body shape variant: A=square, B=round, C=oval, D=squat oval, E=long body, F=long body with hair tufts'),
         }),
     },
     async ({ color, shape }) => {
