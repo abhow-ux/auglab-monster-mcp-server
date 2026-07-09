@@ -75,8 +75,173 @@ server.registerTool(
     }
 );
 
-// --- TODO: define more tools here
+server.registerTool(
+    'clear_monster',
+    {
+        description: 'Remove all parts and start with an empty stage.',
+        inputSchema: z.object({}),
+    },
+    async () => {
+        try {
+            const reply = await sendToGame('clear_monster', {});
+            return { content: [{ type: 'text', text: reply.result }] };
+        } catch (err) {
+            return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+        }
+    }
+);
 
+server.registerTool(
+    'add_arms',
+    {
+        description: 'Add a mirrored pair of arms to the monster. Requires a body to already exist.',
+        inputSchema: z.object({
+            color: z.enum(['blue', 'green', 'red', 'yellow', 'dark']).describe('Arm color'),
+            shape: z.enum(['A', 'B', 'C', 'D', 'E']).describe('Arm pose/shape variant'),
+        }),
+    },
+    async ({ color, shape }) => {
+        try {
+            const reply = await sendToGame('add_arms', { color, shape });
+            return { content: [{ type: 'text', text: reply.result }] };
+        } catch (err) {
+            return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+        }
+    }
+);
+
+server.registerTool(
+    'add_legs',
+    {
+        description: 'Add a mirrored pair of legs to the monster. Requires a body to already exist.',
+        inputSchema: z.object({
+            color: z.enum(['blue', 'green', 'red', 'yellow', 'dark']).describe('Leg color'),
+            shape: z.enum(['A', 'B', 'C']).describe('Leg pose/shape variant'), // GUESS — confirm against real assets
+        }),
+    },
+    async ({ color, shape }) => {
+        try {
+            const reply = await sendToGame('add_legs', { color, shape });
+            return { content: [{ type: 'text', text: reply.result }] };
+        } catch (err) {
+            return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+        }
+    }
+);
+
+server.registerTool(
+    'add_eyes',
+    {
+        description: 'Add eyes to the monster. Requires a body to already exist.',
+        inputSchema: z.object({
+            count: z.number().int().min(1).max(5).describe('Number of eyes'),
+            style: z.enum(['normal', 'angry', 'happy', 'sleepy']).describe('Eye expression style'), // GUESS — confirm against real assets
+        }),
+    },
+    async ({ count, style }) => {
+        try {
+            const reply = await sendToGame('add_eyes', { count, style });
+            return { content: [{ type: 'text', text: reply.result }] };
+        } catch (err) {
+            return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+        }
+    }
+);
+
+server.registerTool(
+    'add_mouth',
+    {
+        description: 'Add a mouth to the monster. Requires a body to already exist.',
+        inputSchema: z.object({
+            style: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']).describe('Mouth style variant'),
+        }),
+    },
+    async ({ style }) => {
+        try {
+            const reply = await sendToGame('add_mouth', { style });
+            return { content: [{ type: 'text', text: reply.result }] };
+        } catch (err) {
+            return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+        }
+    }
+);
+
+server.registerTool(
+    'add_antennas',
+    {
+        description: 'Add antennas to the monster. Requires a body to already exist.',
+        inputSchema: z.object({
+            count: z.number().int().min(1).max(4).describe('Number of antennas'),
+            color: z.enum(['blue', 'green', 'red', 'yellow', 'dark']).describe('Antenna color'),
+            size: z.enum(['small', 'large']).describe('Antenna size'),
+        }),
+    },
+    async ({ count, color, size }) => {
+        try {
+            const reply = await sendToGame('add_antennas', { count, color, size });
+            return { content: [{ type: 'text', text: reply.result }] };
+        } catch (err) {
+            return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+        }
+    }
+);
+
+server.registerTool(
+    'get_monster_state',
+    {
+        description: 'Get a JSON description of every part currently on the monster.',
+        inputSchema: z.object({}),
+    },
+    async () => {
+        try {
+            const reply = await sendToGame('get_monster_state', {});
+            return { content: [{ type: 'text', text: reply.result }] };
+        } catch (err) {
+            return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+        }
+    }
+);
+
+server.registerTool(
+    'build_monster',
+    {
+        description: 'Build a complete monster in one call from a full specification. Any omitted part is simply skipped.',
+        inputSchema: z.object({
+            body: z.object({
+                color: z.enum(['blue', 'green', 'red', 'yellow', 'dark']),
+                shape: z.enum(['A', 'B', 'C', 'D', 'E', 'F']),
+            }).optional(),
+            eyes: z.object({
+                count: z.number().int().min(1).max(5),
+                style: z.enum(['normal', 'angry', 'happy', 'sleepy']),
+            }).optional(),
+            mouth: z.object({
+                style: z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']),
+            }).optional(),
+            arms: z.object({
+                color: z.enum(['blue', 'green', 'red', 'yellow', 'dark']),
+                shape: z.enum(['A', 'B', 'C', 'D', 'E']),
+            }).optional(),
+            legs: z.object({
+                color: z.enum(['blue', 'green', 'red', 'yellow', 'dark']),
+                shape: z.enum(['A', 'B', 'C']),
+            }).optional(),
+            antennas: z.object({
+                count: z.number().int().min(1).max(4),
+                color: z.enum(['blue', 'green', 'red', 'yellow', 'dark']),
+                size: z.enum(['small', 'large']),
+            }).optional(),
+        }),
+    },
+    async (spec) => {
+        try {
+            const reply = await sendToGame('build_monster', spec);
+            return { content: [{ type: 'text', text: reply.result }] };
+        } catch (err) {
+            return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+        }
+    }
+);
 
 // -- Start the server on stdio
 async function main() {
