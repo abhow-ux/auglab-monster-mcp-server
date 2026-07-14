@@ -19,6 +19,32 @@
  *      `mouth{A..J}` key format (no underscore, unlike every other part).
  */
 
+// Apply the optional styling params (tint, scale/scaleX/scaleY, angle, dx/dy)
+// from a command's params onto a sprite that was just created.
+function applyPartStyle(sprite, params) {
+    if (params.tint) {
+        sprite.setTint(parseInt(params.tint.slice(1), 16));
+    }
+    if (params.scale !== undefined) {
+        sprite.setScale(params.scale);
+    }
+    if (params.scaleX !== undefined || params.scaleY !== undefined) {
+        sprite.setScale(
+            params.scaleX ?? sprite.scaleX,
+            params.scaleY ?? sprite.scaleY
+        );
+    }
+    if (params.angle !== undefined) {
+        sprite.setAngle(params.angle);
+    }
+    if (params.dx !== undefined) {
+        sprite.x += params.dx;
+    }
+    if (params.dy !== undefined) {
+        sprite.y += params.dy;
+    }
+}
+
 class MonsterScene extends Phaser.Scene {
     constructor() {
         super('MonsterScene');
@@ -56,11 +82,10 @@ class MonsterScene extends Phaser.Scene {
             }
         }
 
-        // Eyes — key pattern eye_{style} (see OPEN ITEM 3).
-        const eyeStyles = PARTS.eye.styles || ['normal', 'angry', 'happy', 'sleepy'];
-        for (const style of eyeStyles) {
-            const key = `eye_${style}`;
-            this.load.image(key, `assets/${key}.png`);
+        // Eyes — map style enum to actual texture files via PARTS.eye.styles
+        const eyeStyles = PARTS.eye.styles || {};
+        for (const [style, fileKey] of Object.entries(eyeStyles)) {
+            this.load.image(`eye_${style}`, `assets/${fileKey}.png`);
         }
 
         // Mouths — key pattern mouth{A..J}, NO underscore (see OPEN ITEM 4).
@@ -122,7 +147,20 @@ class MonsterScene extends Phaser.Scene {
             } catch (err) {
                 result = `Error executing ${msg.command}: ${err.message}`;
             }
-            this.ws.send(JSON.stringify({ id: msg.id, result }));
+
+            if (result instanceof Promise) {
+                // Async command (e.g. take_screenshot) — reply once it resolves.
+                // The id-matching bridge on the server side doesn't care that
+                // this reply takes longer than a synchronous one.
+                result
+                    .then((res) => this.ws.send(JSON.stringify({ id: msg.id, result: res })))
+                    .catch((err) => this.ws.send(JSON.stringify({
+                        id: msg.id,
+                        result: `Error executing ${msg.command}: ${err.message}`,
+                    })));
+            } else {
+                this.ws.send(JSON.stringify({ id: msg.id, result }));
+            }
         }
     }
 
@@ -149,6 +187,7 @@ class MonsterScene extends Phaser.Scene {
                     return `Error: no body texture for color=${color}, shape=${shape}.`;
                 }
                 this.monster.body = this.add.image(CENTER_X, CENTER_Y, key);
+                applyPartStyle(this.monster.body, params);
                 this.monsterMeta.body = { color, shape };
                 return `Created a ${color} type-${shape} body.`;
             }
@@ -168,6 +207,8 @@ class MonsterScene extends Phaser.Scene {
                 const leftArm = this.add
                     .image(CENTER_X - off.x, CENTER_Y + off.y, key)
                     .setFlipX(true);
+                applyPartStyle(rightArm, params);
+                applyPartStyle(leftArm, params);
 
                 // If the flipped arm looks off-center, the shoulder isn't
                 // at the source image's origin — tune origin instead:
@@ -193,6 +234,8 @@ class MonsterScene extends Phaser.Scene {
                 const leftLeg = this.add
                     .image(CENTER_X - off.x, CENTER_Y + off.y, key)
                     .setFlipX(true);
+                applyPartStyle(rightLeg, params);
+                applyPartStyle(leftLeg, params);
 
                 this.monster.legs = [leftLeg, rightLeg];
                 this.monsterMeta.legs = { color, shape };
@@ -215,11 +258,15 @@ class MonsterScene extends Phaser.Scene {
                 const eyes = [];
 
                 if (n === 1) {
-                    eyes.push(this.add.image(CENTER_X + off.x, CENTER_Y + off.y, key));
+                    const eye = this.add.image(CENTER_X + off.x, CENTER_Y + off.y, key);
+                    applyPartStyle(eye, params);
+                    eyes.push(eye);
                 } else {
                     const startX = CENTER_X + off.x - (spacing * (n - 1)) / 2;
                     for (let i = 0; i < n; i++) {
-                        eyes.push(this.add.image(startX + i * spacing, CENTER_Y + off.y, key));
+                        const eye = this.add.image(startX + i * spacing, CENTER_Y + off.y, key);
+                        applyPartStyle(eye, params);
+                        eyes.push(eye);
                     }
                 }
 
@@ -240,6 +287,7 @@ class MonsterScene extends Phaser.Scene {
 
                 const off = PARTS.mouth.offset; // { x: 0, y: 30 }
                 this.monster.mouth = this.add.image(CENTER_X + off.x, CENTER_Y + off.y, key);
+                applyPartStyle(this.monster.mouth, params);
                 this.monsterMeta.mouth = { style };
                 return `Added a mouth (style ${style}).`;
             }
@@ -263,11 +311,15 @@ class MonsterScene extends Phaser.Scene {
                 const antennas = [];
 
                 if (n === 1) {
-                    antennas.push(this.add.image(CENTER_X + off.x, CENTER_Y + off.y, key));
+                    const antenna = this.add.image(CENTER_X + off.x, CENTER_Y + off.y, key);
+                    applyPartStyle(antenna, params);
+                    antennas.push(antenna);
                 } else {
                     const startX = CENTER_X + off.x - (spacing * (n - 1)) / 2;
                     for (let i = 0; i < n; i++) {
-                        antennas.push(this.add.image(startX + i * spacing, CENTER_Y + off.y, key));
+                        const antenna = this.add.image(startX + i * spacing, CENTER_Y + off.y, key);
+                        applyPartStyle(antenna, params);
+                        antennas.push(antenna);
                     }
                 }
 
@@ -286,12 +338,12 @@ class MonsterScene extends Phaser.Scene {
             case 'build_monster': {
                 // Expected params shape:
                 // {
-                //   body: { color, shape },
-                //   eyes: { count, style },
-                //   mouth: { style },
-                //   arms: { color, shape },
-                //   legs: { color, shape },
-                //   antennas: { count, color, size }
+                //   body: { color, shape, ...style },
+                //   eyes: { count, style, ...style },
+                //   mouth: { style, ...style },
+                //   arms: { color, shape, ...style },
+                //   legs: { color, shape, ...style },
+                //   antennas: { count, color, size, ...style }
                 // }
                 const results = [];
 
@@ -309,6 +361,15 @@ class MonsterScene extends Phaser.Scene {
                 if (params.antennas) results.push(this.executeCommand('add_antennas', params.antennas));
 
                 return `Built monster:\n${results.join('\n')}`;
+            }
+
+            case 'take_screenshot': {
+                return new Promise((resolve) => {
+                    this.game.renderer.snapshot((image) => {
+                        // image.src is "data:image/png;base64,AAAA..."
+                        resolve(image.src.split(',')[1]);
+                    });
+                });
             }
 
             default:

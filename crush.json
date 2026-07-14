@@ -1,0 +1,50 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "providers": {
+    "bayleaf": {
+      "name": "BayLeaf (UCSC)",
+      "type": "openai-compat",
+      "base_url": "https://api.bayleaf.dev/v1",
+      "api_key": "${BAYLEAF_API_KEY:?set BAYLEAF_API_KEY}",
+      "models": [
+        {
+          "id": "openrouter:z-ai/glm-5.2",
+          "name": "Z.ai: GLM 5.2 (BayLeaf)",
+          "context_window": 128000
+        },
+        {
+          "id": "openrouter:z-ai/glm-5.1",
+          "name": "Z.ai: GLM 5.1 (BayLeaf)",
+          "context_window": 128000
+        },
+        {
+          "id": "openrouter:anthropic/claude-opus-4.8",
+          "name": "Anthropic: Opus 4.8 (BayLeaf)",
+          "context_window": 128000
+        },
+        {
+          "id": "openrouter:anthropic/claude-sonnet-5",
+          "name": "Anthropic: Sonnet 5 (BayLeaf)",
+          "context_window": 128000
+        }
+      ]
+    }
+  },
+  "models": {
+    "large": {
+      "model": "openrouter:moonshotai/kimi-k2.6",
+      "provider": "bayleaf"
+    },
+    "small": {
+      "model": "openrouter:moonshotai/kimi-k2.6",
+      "provider": "bayleaf"
+    }
+  },
+  "mcp": {
+    "monster-tools": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["index.js"]
+    }
+  }
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "timestamp": "2026-07-14T00:14:33.967Z",
+    "lesson": "Type-E body shape is long/tall by default, making it a good base for tall-thin monsters. Combining scaleX~0.7 and scaleY~1.5 exaggerates the thinness. Dark tint #222233 is subtle but visible against the canvas."
+  },
+  {
+    "timestamp": "2026-07-14T00:19:08.021Z",
+    "lesson": "Neon Junkbot style: use different saturated primary color per body part (blue/red/yellow/green/dark), tints in #66-#aa range. Exaggerate proportions (body scaleY 1.3+ or 0.7, arms/legs scale 1.2-1.5, small details scale 1.3+). Add slight rotation (5-15°) to paired parts for hand-assembled asymmetry. Create Z-depth by scaling mouth 1.1 and pushing eyes forward (dy -10) with larger scale."
+  },
+  {
+    "timestamp": "2026-07-14T00:21:07.273Z",
+    "lesson": "The angle/dx/dy parameters on mirrored parts (arms, legs, antennas) apply to BOTH halves equally — they tilt or shift the entire pair, not each side independently. True left-right asymmetry is impossible with mirrored pairs. Use uniform tilt as a deliberate \"leaning posture\" stylistic choice, and use dx/dy nudges to offset the pair as a whole, not to create per-side differences."
+  },
+  {
+    "timestamp": "2026-07-14T00:21:08.933Z",
+    "lesson": "Mouth scale 1.1 is too subtle for visible Z-depth overlap against the body. Use scale 1.2-1.3 minimum for the overlap effect to be noticeable. Eyes with dy -12 and scale 1.4 work well for pushing forward."
+  },
+  {
+    "timestamp": "2026-07-14T00:24:29.572Z",
+    "lesson": "Part attachment offsets in PARTS.js are fixed relative to CENTER_X/CENTER_Y and do NOT scale with body scaleX/scaleY. Extreme body proportions create visible gaps (squat body: parts float away from edges) or overlaps (tall body: parts buried in body). Always compensate with dy on arms/legs: use negative dy on squat bodies (pull parts toward body center) and positive dy on tall bodies."
+  },
+  {
+    "timestamp": "2026-07-14T00:24:30.160Z",
+    "lesson": "Crowding the face with 3 eyes at scale 1.4 AND a mouth at scale 1.3 on a squat body makes features blur together into a blob. When stacking multiple large face elements, reduce individual scales to 1.1-1.2 each, or reduce eye count to 2, to keep features distinct and readable."
+  },
+  {
+    "timestamp": "2026-07-14T00:26:16.617Z",
+    "lesson": "Without image viewing capability, dy compensation values for extreme body proportions are guesses. A reasonable heuristic: for scaleY 1.4, arms need roughly +15 to +25 dy and legs +20 to +30 dy to stay visually attached. For scaleY 0.7, arms need roughly -15 to -20 dy and legs -20 to -25 dy. Always state these are estimates that need visual verification."
+  },
+  {
+    "timestamp": "2026-07-14T00:26:16.619Z",
+    "lesson": "Eye style must match the style brief's tone. Neon Junkbot calls for eccentric/menacing energy — sleepy eyes create a mellow feel that contradicts the salvage-yard aesthetic. Use angry or normal eyes for this style. Save sleepy for a deliberately different aesthetic."
+  },
+  {
+    "timestamp": "2026-07-14T00:29:56.485Z",
+    "lesson": "On a tall body (shape E, scaleY 1.4), arms at dy +20 float away from the body — arms need dy ~0 to sit at the body's widest point. Legs at dy +25 are too far up — legs need dy ~+50 to reach the bottom edge of a tall body. The correct dy scales roughly with body height: taller body = more leg dy needed, and arms should stay near dy 0 (body center) where the body is widest. Always position limbs to barely touch the body edge, not floating or buried."
+  },
+  {
+    "timestamp": "2026-07-14T00:46:47.570Z",
+    "lesson": "Complementary color tints (e.g. red eyes on green body) create optical vibration that distracts rather than stylizes. For eye tints, clash with adjacent parts (arms, mouth) not the body itself. Use tints closer to the body's hue family or neutral tints for eyes, and reserve aggressive complements for non-adjacent part pairings."
+  },
+  {
+    "timestamp": "2026-07-14T00:46:47.573Z",
+    "lesson": "Arm shape choice matters relative to body width. On a narrow body (scaleX 0.8), large spreading arm shapes (like E) at scale 1.3 can visually overwhelm the torso, making the monster read as \"arms with a body attached.\" On narrow bodies, prefer compact arm shapes (A or B) or reduce arm scale to 1.1-1.2 to maintain body-dominant silhouette."
+  },
+  {
+    "timestamp": "2026-07-14T00:48:35.690Z",
+    "lesson": "On dark/brown bodies, neutral gray eye tints (#888888) don't provide enough contrast — the face blends into the body. Use brighter tints (#cccccc or no tint for default white) on dark bodies, and darker tints (#444444) on bright bodies. Eye tint brightness should always contrast with body color brightness."
+  },
+  {
+    "timestamp": "2026-07-14T00:48:35.693Z",
+    "lesson": "Varying limb scales creates visual hierarchy and reinforces the \"mismatched parts\" Junkbot aesthetic. Arms and legs at the same scale (both 1.2) looks uniform and machine-stamped. Use different scales per limb type (e.g., arms 1.3, legs 1.1) to make the monster feel assembled from mismatched components."
+  },
+  {
+    "timestamp": "2026-07-14T00:49:45.256Z",
+    "lesson": "Antenna angle direction matters for tone: negative angles (e.g. -10°) tilt antennas downward/inward, reading as wilted or sad. Positive angles (8-15°) tilt them outward/upward, reading as energetic and quirky. For Neon Junkbot's eccentric/menacing energy, always use positive antenna angles. This generalizes: every part's angle direction should reinforce the intended tone, not work against it."
+  },
+  {
+    "timestamp": "2026-07-14T00:49:45.259Z",
+    "lesson": "Color contrast between limbs only happens body-to-limb, never limb-to-limb, because parts attach at fixed offsets around the body and don't physically touch each other. Focus all color tuning on body-to-limb adjacent relationships. Don't worry about whether non-adjacent limbs (e.g. green antennas and yellow legs) clash — they're too far apart to interact visually."
+  },
+  {
+    "timestamp": "2026-07-14T00:51:18.744Z",
+    "lesson": "Just as dy doesn't scale with body scaleY, dx doesn't scale with body scaleX. On wide bodies (scaleX 1.3+), arms at default dx sit too close to center — they don't reach the body's visual left/right edges. Wide bodies need positive dx on arms (roughly +15 to +25) to push arms outward to the body edge. Narrow bodies (scaleX 0.8) may need no dx adjustment since arms already sit at or beyond the narrow body's edge."
+  },
+  {
+    "timestamp": "2026-07-14T00:51:18.747Z",
+    "lesson": "Squat body dy values (arms -15, legs -20) are unverified estimates — no human feedback has confirmed them, unlike tall body values (arms 0, legs +50) which were calibrated by feedback. Treat all squat body dy values as unreliable until visually confirmed. The blind-tuning problem is symmetric: both body extremes (tall and squat) need human feedback calibration, not just one."
+  },
+  {
+    "timestamp": "2026-07-14T00:55:57.121Z",
+    "lesson": "CORRECTION to lessons 7 and 16: On a squat/wide body (shape D, scaleX 1.3, scaleY 0.7), human feedback confirmed: arms float too far OUT horizontally and need NEGATIVE dx (around -15) to pull closer to the body, NOT positive dx. Legs sit too HIGH and need POSITIVE dy (around +15) to push lower, NOT negative dy. Both earlier heuristics were backwards. The correct principle: wide bodies push arms outward beyond the body edge (pull in with negative dx), and squat bodies pull legs upward (push down with positive dy)."
+  },
+  {
+    "timestamp": "2026-07-14T00:55:57.124Z",
+    "lesson": "When human feedback corrects a positioning error, only the specific axis mentioned is confirmed — other axes remain unverified. The human corrected arm dx (too far out → negative) and leg dy (too high → positive), but said nothing about arm dy or leg dx. Don't assume unmentioned axes are correct — they may just be less egregious. Treat unmentioned axes as still-unverified, not as confirmed-correct."
+  },
+  {
+    "timestamp": "2026-07-14T01:25:36.907Z",
+    "lesson": "Eye tint contrast must be sufficient but not so extreme that internal eye detail is lost. #333333 on a bright body provides strong contrast but is so close to black that angry eye expression details (pupils, brows) may be swallowed. Use mid-tone tints like #554444 (dark warm) or #445566 (dark cool) on bright bodies — still contrasts well but preserves internal detail readability."
+  },
+  {
+    "timestamp": "2026-07-14T01:25:36.911Z",
+    "lesson": "Leg shape choice matters relative to body width, same as arms (lesson 11). On a narrow body (scaleX 0.8), wide-spreading leg shapes (like C) may extend beyond the body's narrow footprint, making legs look disproportionately wide. On narrow bodies, prefer compact leg shapes (A) or reduce leg scale further (1.0-1.1). Wider bodies can handle larger leg shapes (B, C) at larger scales."
+  }
+]
