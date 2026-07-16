@@ -32,11 +32,11 @@
   },
   "models": {
     "large": {
-      "model": "openrouter:moonshotai/kimi-k2.6",
+      "model": "openrouter:z-ai/glm-5.2",
       "provider": "bayleaf"
     },
     "small": {
-      "model": "openrouter:moonshotai/kimi-k2.6",
+      "model": "openrouter:z-ai/glm-5.1",
       "provider": "bayleaf"
     }
   },

@@ -17,6 +17,14 @@
  *      add_eyes' tool schema uses in index.js) or your images 404.
  *   4. Mouth style is expected to be a single letter A-J, matching the
  *      `mouth{A..J}` key format (no underscore, unlike every other part).
+ *
+ * EXTENSION ASSIGNMENT NOTES:
+ *   - This file is owned by the browser and hot-reloads on save. New game
+ *     capabilities go in `this.experimental` (see create()), never as new
+ *     switch cases in executeCommand — see AGENTS.md for why and for the
+ *     promotion process into index.js.
+ *   - monsterMeta now stores `tint` alongside color/shape for every part,
+ *     so describe_monster_colors can report on the whole monster.
  */
 
 // Apply the optional styling params (tint, scale/scaleX/scaleY, angle, dx/dy)
@@ -53,6 +61,21 @@ class MonsterScene extends Phaser.Scene {
         this.monsterMeta = {};    // plain data describing the current build, for get_monster_state
         this.ws = null;
         this.connected = false;
+
+        // --- Experimental capability registry (Part 2b) ---
+        // New capabilities the agent builds go here, never as new switch
+        // cases below. Every entry MUST have all three fields: description,
+        // params, handler. See AGENTS.md for the rules of engagement and
+        // for one good / one bad example description.
+        //
+        // Example shape:
+        // add_single_arm: {
+        //     description: 'Place ONE arm on the given side only (no mirroring). ' +
+        //                  'Pose D dangles limply, good for weary characters.',
+        //     params: '{ side: "left"|"right", color, pose, tint?, scale?, dx?, dy? }',
+        //     handler: (p) => { ...; return 'what happened'; },
+        // },
+        this.experimental = {};
     }
 
     preload() {
@@ -188,8 +211,8 @@ class MonsterScene extends Phaser.Scene {
                 }
                 this.monster.body = this.add.image(CENTER_X, CENTER_Y, key);
                 applyPartStyle(this.monster.body, params);
-                this.monsterMeta.body = { color, shape };
-                return `Created a ${color} type-${shape} body.`;
+                this.monsterMeta.body = { color, shape, tint: params.tint || null };
+                return `Created a ${color} type-${shape} body.` + describeTint(color, params.tint);
             }
 
             case 'add_arms': {
@@ -215,8 +238,8 @@ class MonsterScene extends Phaser.Scene {
                 // leftArm.setOrigin(1 - rightArm.originX, rightArm.originY);
 
                 this.monster.arms = [leftArm, rightArm];
-                this.monsterMeta.arms = { color, shape };
-                return `Added a mirrored pair of ${color} arms.`;
+                this.monsterMeta.arms = { color, shape, tint: params.tint || null };
+                return `Added a mirrored pair of ${color} arms.` + describeTint(color, params.tint);
             }
 
             case 'add_legs': {
@@ -238,8 +261,8 @@ class MonsterScene extends Phaser.Scene {
                 applyPartStyle(leftLeg, params);
 
                 this.monster.legs = [leftLeg, rightLeg];
-                this.monsterMeta.legs = { color, shape };
-                return `Added a mirrored pair of ${color} legs.`;
+                this.monsterMeta.legs = { color, shape, tint: params.tint || null };
+                return `Added a mirrored pair of ${color} legs.` + describeTint(color, params.tint);
             }
 
             case 'add_eyes': {
@@ -271,8 +294,11 @@ class MonsterScene extends Phaser.Scene {
                 }
 
                 this.monster.eyes = eyes;
-                this.monsterMeta.eyes = { count: n, style };
-                return `Added ${n} ${style} eye${n > 1 ? 's' : ''}.`;
+                // Eyes are keyed by style, not color — no PART_BASE_COLORS entry
+                // exists for them, so there's no effective-color computation here.
+                this.monsterMeta.eyes = { count: n, style, tint: params.tint || null };
+                return `Added ${n} ${style} eye${n > 1 ? 's' : ''}.` +
+                    (params.tint ? ' (tint applied — no base color known for eye textures, so effective color can\'t be computed; check the result visually.)' : '');
             }
 
             case 'add_mouth': {
@@ -288,8 +314,9 @@ class MonsterScene extends Phaser.Scene {
                 const off = PARTS.mouth.offset; // { x: 0, y: 30 }
                 this.monster.mouth = this.add.image(CENTER_X + off.x, CENTER_Y + off.y, key);
                 applyPartStyle(this.monster.mouth, params);
-                this.monsterMeta.mouth = { style };
-                return `Added a mouth (style ${style}).`;
+                this.monsterMeta.mouth = { style, tint: params.tint || null };
+                return `Added a mouth (style ${style}).` +
+                    (params.tint ? ' (tint applied — no base color known for mouth textures, so effective color can\'t be computed; check the result visually.)' : '');
             }
 
             case 'add_antennas': {
@@ -324,8 +351,8 @@ class MonsterScene extends Phaser.Scene {
                 }
 
                 this.monster.antennas = antennas;
-                this.monsterMeta.antennas = { count: n, color, size };
-                return `Added ${n} antenna${n > 1 ? 's' : ''}.`;
+                this.monsterMeta.antennas = { count: n, color, size, tint: params.tint || null };
+                return `Added ${n} antenna${n > 1 ? 's' : ''}.` + describeTint(color, params.tint);
             }
 
             case 'get_monster_state': {
@@ -333,6 +360,55 @@ class MonsterScene extends Phaser.Scene {
                     return JSON.stringify({ empty: true, message: 'No monster built yet.' });
                 }
                 return JSON.stringify(this.monsterMeta);
+            }
+
+            case 'describe_monster_colors': {
+                // Part 1c: ground truth (base color, tint, computed effective
+                // color, luminance) from code; judgment about whether it looks
+                // good stays with the agent. Every luminance is also reported
+                // relative to the body's, since contrast — not raw brightness —
+                // is what "Agents that Learn" agents kept misjudging.
+                if (!this.monster.body) {
+                    return JSON.stringify({ empty: true, message: 'No monster built yet.' });
+                }
+
+                const bodyMeta = this.monsterMeta.body;
+                const bodyBase = PART_BASE_COLORS[bodyMeta.color];
+                const bodyEffective = bodyMeta.tint ? effectiveColor(bodyBase, bodyMeta.tint) : bodyBase;
+                const bodyLum = luminance(bodyEffective);
+
+                const report = [];
+                for (const [partName, meta] of Object.entries(this.monsterMeta)) {
+                    if (!meta) continue;
+
+                    if (!meta.color) {
+                        // Style-based parts (eyes, mouth) — no known base color.
+                        report.push({
+                            part: partName,
+                            baseColor: null,
+                            tint: meta.tint || null,
+                            effectiveColor: null,
+                            luminance: null,
+                            luminanceDiffFromBody: null,
+                            note: 'no known base color for this part (style-based texture, not color-based)',
+                        });
+                        continue;
+                    }
+
+                    const base = PART_BASE_COLORS[meta.color];
+                    const effective = meta.tint ? effectiveColor(base, meta.tint) : base;
+                    const lum = luminance(effective);
+                    report.push({
+                        part: partName,
+                        baseColor: base,
+                        tint: meta.tint || null,
+                        effectiveColor: effective,
+                        luminance: lum,
+                        luminanceDiffFromBody: partName === 'body' ? 0 : lum - bodyLum,
+                    });
+                }
+
+                return JSON.stringify(report, null, 2);
             }
 
             case 'build_monster': {
@@ -372,8 +448,22 @@ class MonsterScene extends Phaser.Scene {
                 });
             }
 
-            default:
+            // --- Experimental registry plumbing (Part 2b) ---
+            case 'list_experimental_commands': {
+                const names = Object.keys(this.experimental);
+                if (names.length === 0) return 'No experimental commands yet.';
+                return JSON.stringify(names.map(n => ({
+                    name: n,
+                    description: this.experimental[n].description,
+                    params: this.experimental[n].params,
+                })), null, 2);
+            }
+
+            default: {
+                const exp = this.experimental[command];
+                if (exp) return exp.handler(params);
                 return `Unknown command: ${command}`;
+            }
         }
     }
 }

@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "monster-tools": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "index.js"
+      ],
+      "env": {}
+    }
+  }
+}
