@@ -75,7 +75,17 @@ class MonsterScene extends Phaser.Scene {
         //     params: '{ side: "left"|"right", color, pose, tint?, scale?, dx?, dy? }',
         //     handler: (p) => { ...; return 'what happened'; },
         // },
-        this.experimental = {};
+        this.experimental = {
+            set_background_color: {
+                description: 'Change the scene background color at runtime to test how background luminance affects part readability. Explores background-relative contrast that the body-relative luminance threshold cannot measure.',
+                params: '{ color: hex string like "#1a1a2e" or "#d8d8d8" }',
+                handler: (p) => {
+                    if (!p || !p.color) return 'Error: color parameter required (hex string like "#1a1a2e")';
+                    this.cameras.main.setBackgroundColor(p.color);
+                    return `Background changed to ${p.color}`;
+                },
+            },
+        };
     }
 
     preload() {

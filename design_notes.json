@@ -82,5 +82,35 @@
   {
     "timestamp": "2026-07-14T01:25:36.911Z",
     "lesson": "Leg shape choice matters relative to body width, same as arms (lesson 11). On a narrow body (scaleX 0.8), wide-spreading leg shapes (like C) may extend beyond the body's narrow footprint, making legs look disproportionately wide. On narrow bodies, prefer compact leg shapes (A) or reduce leg scale further (1.0-1.1). Wider bodies can handle larger leg shapes (B, C) at larger scales."
+  },
+  {
+    "timestamp": "2026-07-16T00:54:18.608Z",
+    "style": "Monster Series: 1.0",
+    "lesson": "Iteration 1 baseline: green body (#5ba85b, lum 146) with yellow arms (+44 diff), dark legs (-71 diff), blue antennas (-43 diff) — all exceed the 30-luminance readability threshold. However, 4 distinct colors (green/yellow/dark/blue) exceeds the 2-3 color cohesion target. Eyes and mouth return null luminance (style-based textures, no base color known) so they must be judged by structural reasoning, not contrast numbers. Default offsets/proportions were used with no tuning. See gallery/monster-series-1-0/001.png."
+  },
+  {
+    "timestamp": "2026-07-16T02:34:13.528Z",
+    "style": "Monster Series: 2.0",
+    "lesson": "DUAL-CONTRAST RULE: The 30-luminance threshold is a hard floor for BOTH body-relative AND background-relative contrast. Body-relative is necessary but NOT sufficient — background-relative is an independent dimension. Monochrome (all body-diff 0) makes parts invisible (iter 4 violation). Default bg #2d2d44 (lum 48) is too close to dark parts (legs lum 51, bg-diff 3 → nearly invisible). On light bg #d8d8d8 (lum 216), yellow arms (lum 190, bg-diff 26) vanish. Very dark bg #0a0a14 (lum 11) makes all parts visible (min bg-diff 40). RULE: both body-relative AND background-relative diffs must exceed 30. This supersedes the body-only threshold from earlier iterations. See gallery/monster-series-2-0/001.png, 004.png (body-relative), 011.png, 012.png, 013.png (background-relative)."
+  },
+  {
+    "timestamp": "2026-07-16T02:34:13.528Z",
+    "style": "Monster Series: 2.0",
+    "lesson": "LINEAR DY COMPENSATION: Part offsets don't scale with body proportions — compensation is mandatory and scales roughly linearly: dy ≈ body_half_height × (scaleY - 1). Calibrated: scaleY 1.2: legs dy +30, antennas dy -50 (±30 safety margin over formula's ±22). scaleY 1.4: legs +50, antennas -50 to -80. scaleY 1.8: errors ~2x worse (legs +98, antennas -103). Arms at dy 0 (center, widest point). Calibration at one scaleY extrapolates to others. Supersedes earlier dy-only lessons from iters 2 and 11. See gallery/monster-series-2-0/002.png, 007.png, 009.png."
+  },
+  {
+    "timestamp": "2026-07-16T02:34:13.528Z",
+    "style": "Monster Series: 2.0",
+    "lesson": "TINT SOPHISTICATION: Multiplicative tints can ONLY darken — yellow base (lum 190) is the only base light enough for visible tint results. 4-color tint family from 1 yellow base: orange (#ff8844, lum 121), untinted yellow (lum 190), dark brown (#444444, lum 51), olive (#448844, lum 87) — body-relative diffs +69/-70/-34. Tint is shape-agnostic — body shape F's hair tufts inherit tint. Dark/medium base tinting produces unreadable results (iter 12 violation: dark base + bright tints #ff44ff/#44ff44/#4444ff/#ffff44 all collapsed to very dark, 2 of 4 parts below 30-lum floor). Supersedes earlier tint lessons from iters 3, 6, and 12. See gallery/monster-series-2-0/003.png, 009.png, 010.png."
+  },
+  {
+    "timestamp": "2026-07-16T02:34:13.528Z",
+    "style": "Monster Series: 2.0",
+    "lesson": "EXPRESSION AND HIERARCHY: Expression variables (eye style, mouth style, antenna size/angle) are primary archetype drivers but return null luminance — must judge structurally. Negative antenna angles = menacing/wilful. Large antennas add visual weight. Scale hierarchy creates focal points: moderate ratios (1.2:1.0) are safe; extreme (2.6x at 1.8:0.7) causes parts to extend beyond body or become too small. Arms at scale 0.9 (subordinate), antennas at scale 1.2 (focal) work well together. See gallery/monster-series-2-0/005.png, 006.png."
+  },
+  {
+    "timestamp": "2026-07-16T02:34:13.528Z",
+    "style": "Monster Series: 2.0",
+    "lesson": "TECHNIQUE SYNTHESIS: Combining multiple techniques creates richer designs because each operates on a different dimension (color/expression/scale/proportion/background) so they don't conflict. Final design 'Midnight Sentinel' (iter 14) applies all 5 techniques simultaneously: yellow tint family + angry eyes/mouth D + moderate hierarchy (antennas 1.2, arms 0.9, body scaleY 1.2) + dy-compensated proportions + custom dark background (#0a0a14). ALL parts pass dual-contrast thresholds (body-relative: 69/70/34, background-relative: 110/179/40/76). Supersedes earlier synthesis lessons from iters 9 and 14. See gallery/monster-series-2-0/008.png, 014.png."
   }
 ]
